@@ -144,11 +144,27 @@ struct LoginView: View {
                 if let error = error {
                     self.loginStatusMessege = error.localizedDescription
                 }
+                
+                guard let url = url else { return }
+                storeUserProfileImage(with: url)
+                
                 return
             }
             
             self.loginStatusMessege = ""
         }
+    }
+    
+    private func storeUserProfileImage(with url : URL) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let userData = ["email": email, "uid": uid, "profileImageURL": url.absoluteString]
+        Firestore.firestore().collection("users")
+            .document(uid).setData(userData) { error in
+                if let error = error {
+                    self.loginStatusMessege = error.localizedDescription
+                    return
+                }
+            }
     }
 }
 
