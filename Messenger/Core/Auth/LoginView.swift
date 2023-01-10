@@ -11,19 +11,21 @@ import FirebaseStorage
 
 struct LoginView: View {
     
-    @State var isLoginMode = false
-    @State var email = ""
-    @State var password = ""
+    @EnvironmentObject var viewModel: AuthViewModel
     
-    @State var loginStatusMessege = ""
+    @State var email = ""
+    @State var username = ""
+    @State var password = ""
+
     @State var shouldShowImagePicker = false
     @State var image : UIImage?
+    
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack (spacing: 16){
-                    Picker(selection: $isLoginMode) {
+                    Picker(selection: $viewModel.isLoginMode) {
                         Text("Login")
                             .tag(true)
                         Text("Create Account")
@@ -33,7 +35,7 @@ struct LoginView: View {
                     }
                     .pickerStyle(.segmented)
                     
-                    if !isLoginMode {
+                    if !$viewModel.isLoginMode.wrappedValue {
                         Button {
                             shouldShowImagePicker.toggle()
                         } label: {
@@ -60,6 +62,11 @@ struct LoginView: View {
                         TextField("Email", text: $email)
                             .keyboardType(.emailAddress)
                             .autocapitalization(.none)
+                        if !$viewModel.isLoginMode.wrappedValue {
+                            TextField("Username", text: $username)
+                                .keyboardType(.emailAddress)
+                                .autocapitalization(.none)
+                        }
                         SecureField("Password", text: $password)
                     }
                     .padding(12)
@@ -70,7 +77,7 @@ struct LoginView: View {
                     } label: {
                         HStack {
                             Spacer()
-                            Text(isLoginMode ? "Log In" : "Create Account")
+                            Text($viewModel.isLoginMode.wrappedValue ? "Log In" : "Create Account")
                                 .padding(.vertical, 8)
                             Spacer()
                         }
@@ -79,13 +86,13 @@ struct LoginView: View {
                         .font(.system(size: 14, weight: .semibold))
                     }
                     
-                    Text(self.loginStatusMessege)
+                    Text($viewModel.loginStatusMessege.wrappedValue)
                         .foregroundColor(.red)
                         .font(.footnote)
                 }
                 .padding()
             }
-            .navigationTitle(isLoginMode ? "Log In" : "Create Account")
+            .navigationTitle($viewModel.isLoginMode.wrappedValue ? "Log In" : "Create Account")
             .background(Color(.init(white: 0, alpha: 0.05))
                 .ignoresSafeArea())
         }
@@ -96,76 +103,25 @@ struct LoginView: View {
     
     
     private func handleAction() {
-        if isLoginMode {
-            loginUser()
+        if $viewModel.isLoginMode.wrappedValue {
+            viewModel.login(email: email,
+                            password: password) {
+                email = ""
+                password = ""
+            }
         } else {
-            createNewAccount()
+            viewModel.register(email: email,
+                               password: password,
+                               image: image,
+                               username: username) {
+                email = ""
+                password = ""
+                username = ""
+                image = nil
+            }
         }
     }
-    
-    private func loginUser() {
-        Auth.auth().signIn(withEmail: email, password: password) { result, error in
-            if let error = error {
-                self.loginStatusMessege = error.localizedDescription
-                return
-            }
-            self.loginStatusMessege = ""
-        }
-    }
-    
-    private func createNewAccount() {
-        if image == nil {
-            self.loginStatusMessege = "Please provide profile photo"
-            return
-        }
-        Auth.auth().createUser(withEmail: email, password: password) { result, error in
-            if let error = error {
-                self.loginStatusMessege = error.localizedDescription
-                return
-            }
-            self.loginStatusMessege = ""
-            
-            self.persistImageToStorage()
-        }
-        
-    }
-    
-    private func persistImageToStorage() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        let ref = Storage.storage().reference(withPath: uid)
-        guard let imageData = self.image?.jpegData(compressionQuality: 0.5) else { return }
-        ref.putData(imageData) { metadata, error in
-            if let error = error {
-                self.loginStatusMessege = error.localizedDescription
-                return
-            }
-            
-            ref.downloadURL { url, error in
-                if let error = error {
-                    self.loginStatusMessege = error.localizedDescription
-                }
-                
-                guard let url = url else { return }
-                storeUserProfileImage(with: url)
-                
-                return
-            }
-            
-            self.loginStatusMessege = ""
-        }
-    }
-    
-    private func storeUserProfileImage(with url : URL) {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
-        let userData = ["email": email, "uid": uid, "profileImageURL": url.absoluteString]
-        Firestore.firestore().collection("users")
-            .document(uid).setData(userData) { error in
-                if let error = error {
-                    self.loginStatusMessege = error.localizedDescription
-                    return
-                }
-            }
-    }
+
 }
 
 struct ContentView_Previews: PreviewProvider {

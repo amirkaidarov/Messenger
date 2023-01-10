@@ -6,9 +6,14 @@
 //
 
 import SwiftUI
+import SDWebImageSwiftUI
 
 struct MainMessagesView: View {
-    @State var shouldShowLogoutOptions = false
+    @State private var shouldShowLogoutOptions = false
+    @State private var shouldShowMessageScreen = false
+    @ObservedObject private var messagesViewModel = MainMessagesViewModel()
+    @EnvironmentObject var authViewModel : AuthViewModel
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -26,10 +31,19 @@ struct MainMessagesView: View {
 extension MainMessagesView {
     private var navigationBar : some View {
         HStack (spacing: 16) {
-            Image(systemName: "person.fill")
-                .font(.system(size: 34, weight: .heavy))
+            
+            WebImage(url: URL(string: $authViewModel.currentUser.wrappedValue?.imageURL ?? ""))
+                .resizable()
+                .scaledToFill()
+                .frame(width: 50, height: 50)
+                .clipped()
+                .cornerRadius(50)
+                .overlay(RoundedRectangle(cornerRadius: 44)
+                    .stroke(Color(.label), lineWidth: 1))
+                .shadow(radius: 5)
+            
             VStack (alignment: .leading, spacing: 4){
-                Text("USERNAME")
+                Text($authViewModel.currentUser.wrappedValue?.username ?? "")
                     .font(.system(size: 24, weight: .bold))
                 HStack {
                     Circle()
@@ -55,7 +69,7 @@ extension MainMessagesView {
             isPresented: $shouldShowLogoutOptions
         ) {
             Button("Sign Out", role: .destructive) {
-                // Handle sign out
+                authViewModel.signOut()
             }
             Button("Cancel", role: .cancel) {
                 
@@ -67,7 +81,7 @@ extension MainMessagesView {
     
     private var newMessageButton : some View {
         Button {
-            
+            shouldShowMessageScreen.toggle()
         } label: {
             HStack {
                 Spacer()
@@ -81,6 +95,9 @@ extension MainMessagesView {
             .cornerRadius(32)
             .padding(.horizontal)
             .shadow(radius: 15)
+        }
+        .fullScreenCover(isPresented: $shouldShowMessageScreen) {
+            CreateNewMessagesView()
         }
     }
     
@@ -120,6 +137,7 @@ extension MainMessagesView {
 struct MainMessagesView_Previews: PreviewProvider {
     static var previews: some View {
         MainMessagesView()
+            .environmentObject(AuthViewModel())
     }
 }
 
