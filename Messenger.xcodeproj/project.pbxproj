@@ -26,6 +26,7 @@
 		036D83E3296C81160018D607 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 036D83E2296C81160018D607 /* FirebaseStorage */; };
 		03F541C5296D90970056EC6E /* CreateNewMessagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F541C4296D90970056EC6E /* CreateNewMessagesView.swift */; };
 		03F541C9296D94160056EC6E /* CreateNewMessagesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F541C8296D94160056EC6E /* CreateNewMessagesViewModel.swift */; };
+		03F541CB296DB20E0056EC6E /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F541CA296DB20E0056EC6E /* ChatView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		036D83D8296C7F790018D607 /* UserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
 		03F541C4296D90970056EC6E /* CreateNewMessagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateNewMessagesView.swift; sourceTree = "<group>"; };
 		03F541C8296D94160056EC6E /* CreateNewMessagesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateNewMessagesViewModel.swift; sourceTree = "<group>"; };
+		03F541CA296DB20E0056EC6E /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +143,7 @@
 			children = (
 				036D83C9296C52C70018D607 /* MainMessagesView.swift */,
 				03F541C4296D90970056EC6E /* CreateNewMessagesView.swift */,
+				03F541CA296DB20E0056EC6E /* ChatView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -257,6 +260,7 @@
 				036D83CA296C52C80018D607 /* MainMessagesView.swift in Sources */,
 				036D83D9296C7F790018D607 /* UserService.swift in Sources */,
 				036D83D3296C7ED90018D607 /* ContentView.swift in Sources */,
+				03F541CB296DB20E0056EC6E /* ChatView.swift in Sources */,
 				036D83CE296C6F710018D607 /* ChatUser.swift in Sources */,
 				036D83D6296C7F260018D607 /* AuthViewModel.swift in Sources */,
 				036D83B1296B5E400018D607 /* LoginView.swift in Sources */,

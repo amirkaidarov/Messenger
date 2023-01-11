@@ -13,9 +13,11 @@ struct MainMessagesView: View {
     @State private var shouldShowMessageScreen = false
     @ObservedObject private var messagesViewModel = MainMessagesViewModel()
     @EnvironmentObject var authViewModel : AuthViewModel
+    @State private var selectedChatUser : ChatUser?
+    @State private var shouldNavigateToChatView = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 navigationBar
                 
@@ -24,6 +26,9 @@ struct MainMessagesView: View {
             .overlay(
                 newMessageButton, alignment: .bottom)
             .toolbar(.hidden)
+            .navigationDestination(isPresented: $shouldNavigateToChatView) {
+                ChatView(chatUser: selectedChatUser)
+            }
         }
     }
 }
@@ -97,35 +102,43 @@ extension MainMessagesView {
             .shadow(radius: 15)
         }
         .fullScreenCover(isPresented: $shouldShowMessageScreen) {
-            CreateNewMessagesView()
+            CreateNewMessagesView { chatUser in
+                self.selectedChatUser = chatUser
+                self.shouldNavigateToChatView.toggle()
+            }
         }
     }
     
     private var messagesView : some View {
         ScrollView {
             ForEach(1..<10, id : \.self) { _ in
-                Group {
-                    HStack (spacing : 16){
-                        Image(systemName: "person.fill")
-                            .font(.system(size: 32))
-                            .padding()
-                            .overlay(RoundedRectangle(cornerRadius: 44)
-                                .stroke(Color(.label), lineWidth: 1))
-                        VStack (alignment: .leading){
-                            Text("Username")
-                                .font(.system(size: 16, weight: .bold))
-                            Text("Message sent to user")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(Color(.lightGray))
+                NavigationLink {
+                    ChatView(chatUser: selectedChatUser)
+                } label: {
+                    Group {
+                        HStack (spacing : 16){
+                            Image(systemName: "person.fill")
+                                .font(.system(size: 32))
+                                .padding()
+                                .overlay(RoundedRectangle(cornerRadius: 44)
+                                    .stroke(Color(.label), lineWidth: 1))
+                            VStack (alignment: .leading){
+                                Text("Username")
+                                    .font(.system(size: 16, weight: .bold))
+                                Text("Message sent to user")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(Color(.lightGray))
+                            }
+                            Spacer()
+                            Text("22d")
+                                .font(.system(size: 14, weight: .semibold))
                         }
-                        Spacer()
-                        Text("22d")
-                            .font(.system(size: 14, weight: .semibold))
+                        Divider()
+                            .padding(.vertical, 8)
                     }
-                    Divider()
-                        .padding(.vertical, 8)
+                    .padding(.horizontal)
+                    .foregroundColor(Color(.label))
                 }
-                .padding(.horizontal)
             }
             .padding(.bottom, 50)
         }

@@ -12,12 +12,15 @@ struct CreateNewMessagesView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var createNewMessagesViewModel = CreateNewMessagesViewModel()
     
+    let didSelectUser : (ChatUser) -> ()
+    
     var body: some View {
         NavigationView {
             ScrollView {
                 ForEach(createNewMessagesViewModel.chatUsers) { chatUser in
                     Button {
-                        //
+                        presentationMode.wrappedValue.dismiss()
+                        didSelectUser(chatUser)
                     } label: {
                         HStack (spacing: 16) {
                             WebImage(url: URL(string: chatUser.imageURL))
@@ -55,6 +58,6 @@ struct CreateNewMessagesView: View {
 
 struct NewMessagesView_Previews: PreviewProvider {
     static var previews: some View {
-        CreateNewMessagesView()
+        CreateNewMessagesView { _ in }
     }
 }
