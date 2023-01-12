@@ -111,32 +111,48 @@ extension MainMessagesView {
     
     private var messagesView : some View {
         ScrollView {
-            ForEach(1..<10, id : \.self) { _ in
-                NavigationLink {
-                    ChatView(chatUser: selectedChatUser)
+            ForEach(messagesViewModel.recentMessages) { recentMessage  in
+                Button {
+                    
+                    let uid = authViewModel.currentUser?.id == recentMessage.fromID ? recentMessage.toID : recentMessage.fromID
+                    
+                    self.selectedChatUser = .init(id: uid,
+                                                  username: recentMessage.username,
+                                                  email: "",
+                                                  imageURL: recentMessage.imageURL)
+
+                    self.shouldNavigateToChatView.toggle()
+                    
                 } label: {
                     Group {
                         HStack (spacing : 16){
-                            Image(systemName: "person.fill")
-                                .font(.system(size: 32))
-                                .padding()
+                            WebImage(url: URL(string: recentMessage.imageURL))
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 64, height: 64)
+                                .clipped()
+                                .cornerRadius(64)
                                 .overlay(RoundedRectangle(cornerRadius: 44)
                                     .stroke(Color(.label), lineWidth: 1))
+                                .shadow(radius: 5)
+                            
                             VStack (alignment: .leading){
-                                Text("Username")
+                                Text(recentMessage.username)
                                     .font(.system(size: 16, weight: .bold))
-                                Text("Message sent to user")
+                                Text(recentMessage.text)
                                     .font(.system(size: 14, weight: .bold))
-                                    .foregroundColor(Color(.lightGray))
+                                    .foregroundColor(Color(.darkGray))
+                                    .multilineTextAlignment(.leading)
                             }
                             Spacer()
-                            Text("22d")
+                            Text(recentMessage.timeAgo)
                                 .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(Color(.label))
                         }
                         Divider()
                             .padding(.vertical, 8)
                     }
-                    .padding(.horizontal)
+                    .padding(.leading)
                     .foregroundColor(Color(.label))
                 }
             }

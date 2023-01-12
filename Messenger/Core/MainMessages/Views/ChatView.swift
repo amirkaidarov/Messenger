@@ -9,22 +9,21 @@ import SwiftUI
 
 struct ChatView: View {
     let chatUser : ChatUser?
+    @ObservedObject var chatViewModel : ChatViewModel
     
-    @State var chatText = ""
+    init(chatUser: ChatUser?) {
+        self.chatUser = chatUser
+        
+        self.chatViewModel = ChatViewModel(chatUser: chatUser)
+    }
     
     var body: some View {
-        ZStack {
+        ZStack{
             messagesColumn
-            
-            VStack {
-                Spacer()
-                bottomBar
-                    .background(Color(.systemBackground))
-            }
-            
+                .navigationTitle(chatUser?.username ?? "")
+                .navigationBarTitleDisplayMode(.inline)
+            Text(chatViewModel.errorMessage)
         }
-        .navigationTitle(chatUser?.username ?? "")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -32,35 +31,42 @@ extension ChatView {
     
     private var messagesColumn : some View {
         ScrollView {
-            ForEach(0..<20) { _ in
-                HStack {
-                    Spacer()
-                    HStack {
-                        Text("Hello")
-                            .foregroundColor(.white)
-                    }
-                    .padding()
-                    .background(Color.blue)
-                    .cornerRadius(8)
+            ScrollViewReader { proxy in
+                ForEach(chatViewModel.chatMessages) { message in
+                    MessageView(message: message,
+                                isSentByCurrentUser: chatViewModel.isSentByCurrentUser(message))
                 }
-                .padding(.horizontal)
-                .padding(.top, 8)
+                HStack { Spacer() }
+                    .id("Empty")
+                    .onReceive(chatViewModel.$count) { _ in
+                        withAnimation(.easeOut(duration: 0.5)) {
+                            DispatchQueue.main.async {
+                                proxy.scrollTo("Empty", anchor: .bottom)
+                            }
+                        }
+                    }
             }
-            HStack { Spacer() }
-                .frame(height: 70)
         }
-        .background(Color(.init(white: 0.95, alpha: 1)).edgesIgnoringSafeArea([]))
+        .safeAreaInset(edge: .bottom) {
+            bottomBar
+                .background(Color(
+                    .systemBackground)
+                    .ignoresSafeArea())
+        }
+        .background(Color(.init(white: 0.95, alpha: 1))
+            .edgesIgnoringSafeArea([])
+        )
     }
     
     private var bottomBar : some View {
-        HStack (spacing: 16) {
+        HStack (alignment : .bottom,spacing: 16) {
             Image(systemName: "photo.on.rectangle")
                 .font(.system(size: 24))
                 .foregroundColor(Color(.darkGray))
-            TextField("Message...", text: $chatText, axis: .vertical)
+            TextField("Message...", text: $chatViewModel.chatText, axis: .vertical)
                 .lineLimit(5)
             Button {
-                //
+                chatViewModel.send()
             } label: {
                 Image(systemName: "paperplane.fill")
                     .font(.system(size: 24))

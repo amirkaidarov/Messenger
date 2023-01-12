@@ -15,6 +15,7 @@ class CreateNewMessagesViewModel : ObservableObject {
     
     init() {
         self.fetchUsers()
+        
     }
     
     func fetchUsers() {

@@ -24,7 +24,7 @@ struct UserService {
     func fetchUsers(completion : @escaping([ChatUser]) -> Void) {
         Firestore.firestore().collection("users")
             .getDocuments { documentsSnapshot, error in
-                if let error = error {
+                if error != nil {
                     print("error fetching users from firebase")
                     return
                 }
